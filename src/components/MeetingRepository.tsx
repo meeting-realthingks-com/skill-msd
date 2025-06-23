@@ -279,7 +279,7 @@ export const MeetingRepository = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => shareeMeeting(meeting)}
+                    onClick={() => shareMeeting(meeting)}
                   >
                     <Share className="w-4 h-4" />
                   </Button>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -204,7 +203,6 @@ export const CalendarIntegration = () => {
                       <Switch 
                         checked={meeting.autoJoinEnabled}
                         onCheckedChange={() => toggleAutoJoin(meeting.id)}
-                        size="sm"
                       />
                     </div>
                     
