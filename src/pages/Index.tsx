@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,9 @@ import { RecordingInterface } from "@/components/RecordingInterface";
 import { MeetingCard } from "@/components/MeetingCard";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { CalendarIntegration } from "@/components/CalendarIntegration";
+import { AIMeetingChat } from "@/components/AIMeetingChat";
+import { MeetingRepository } from "@/components/MeetingRepository";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -112,9 +114,12 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-96">
+          <TabsList className="grid w-full grid-cols-7 lg:w-full">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
             <TabsTrigger value="record">Record</TabsTrigger>
+            <TabsTrigger value="repository">Repository</TabsTrigger>
+            <TabsTrigger value="chat">AI Chat</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -182,8 +187,20 @@ const Index = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="calendar">
+            <CalendarIntegration />
+          </TabsContent>
+
           <TabsContent value="record">
             <RecordingInterface />
+          </TabsContent>
+
+          <TabsContent value="repository">
+            <MeetingRepository />
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <AIMeetingChat meetingTitle="Product Strategy Meeting" meetingId="1" />
           </TabsContent>
 
           <TabsContent value="analytics">
