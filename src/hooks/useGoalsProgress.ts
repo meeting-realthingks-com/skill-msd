@@ -24,12 +24,21 @@ export const useGoalsProgress = () => {
     try {
       setLoading(true);
       
-      // Fetch personal goals
-      const { data: goalsData } = await supabase
+      // Fetch personal goals first
+      const { data: goalsData, error: goalsError } = await supabase
         .from('personal_goals')
-        .select('*, skill:skills(*)')
+        .select('*')
         .eq('user_id', profile.user_id)
         .order('created_at', { ascending: false });
+      
+      if (goalsError) {
+        console.error('Error fetching goals:', goalsError);
+      }
+
+      // Fetch skills separately to avoid relation issues
+      const { data: skillsData } = await supabase
+        .from('skills')
+        .select('*');
       
       // Fetch or create gamification data
       let { data: gamificationData } = await supabase
@@ -47,7 +56,25 @@ export const useGoalsProgress = () => {
         gamificationData = newGamificationData;
       }
       
-      setGoals((goalsData as any) || []);
+      // Map goals with skills and proper typing
+      const goalsWithSkills = (goalsData || []).map(goal => {
+        const skill = skillsData?.find(s => s.id === goal.skill_id);
+        return {
+          ...goal,
+          target_rating: goal.target_rating as 'high' | 'medium' | 'low',
+          current_rating: goal.current_rating as 'high' | 'medium' | 'low',
+          status: goal.status as 'active' | 'completed' | 'overdue' | 'cancelled',
+          skill: skill ? {
+            id: skill.id,
+            category_id: skill.category_id,
+            name: skill.name,
+            description: skill.description,
+            created_at: skill.created_at
+          } : undefined
+        };
+      });
+      
+      setGoals(goalsWithSkills as PersonalGoal[]);
       setGamification(gamificationData);
       
     } catch (error) {

@@ -51,20 +51,20 @@ export const GoalsProgressCard = () => {
       // Fetch user's approved skills for goal creation
       const { data: userSkillsData } = await supabase
         .from('user_skills')
-        .select('*, skill:skills(*)')
+        .select('*')
         .eq('user_id', profile.user_id)
         .eq('status', 'approved');
       
       // Fetch all available skills
       const { data: skillsData } = await supabase
         .from('skills')
-        .select('*, category:skill_categories(*)')
+        .select('*')
         .order('name');
       
       // Fetch personal goals
       const { data: goalsData } = await supabase
         .from('personal_goals')
-        .select('*, skill:skills(*)')
+        .select('*')
         .eq('user_id', profile.user_id)
         .order('created_at', { ascending: false });
       
@@ -91,9 +91,44 @@ export const GoalsProgressCard = () => {
         gamificationData = newGamificationData;
       }
       
-      setUserSkills((userSkillsData as any) || []);
+      // Map user skills with skills data
+      const userSkillsWithSkills = (userSkillsData || []).map(userSkill => {
+        const skill = skillsData?.find(s => s.id === userSkill.skill_id);
+        return {
+          ...userSkill,
+          rating: userSkill.rating as 'high' | 'medium' | 'low',
+          status: userSkill.status as 'draft' | 'submitted' | 'approved' | 'rejected',
+          skill: skill ? {
+            id: skill.id,
+            category_id: skill.category_id,
+            name: skill.name,
+            description: skill.description,
+            created_at: skill.created_at
+          } : undefined
+        };
+      });
+
+      // Map goals with skills data
+      const goalsWithSkills = (goalsData || []).map(goal => {
+        const skill = skillsData?.find(s => s.id === goal.skill_id);
+        return {
+          ...goal,
+          target_rating: goal.target_rating as 'high' | 'medium' | 'low',
+          current_rating: goal.current_rating as 'high' | 'medium' | 'low',
+          status: goal.status as 'active' | 'completed' | 'overdue' | 'cancelled',
+          skill: skill ? {
+            id: skill.id,
+            category_id: skill.category_id,
+            name: skill.name,
+            description: skill.description,
+            created_at: skill.created_at
+          } : undefined
+        };
+      });
+      
+      setUserSkills(userSkillsWithSkills as UserSkill[]);
       setAvailableSkills(skillsData || []);
-      setGoals((goalsData as any) || []);
+      setGoals(goalsWithSkills as PersonalGoal[]);
       setAchievements(achievementsData || []);
       setGamification(gamificationData);
       
