@@ -3,9 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Users, TrendingUp, CheckCircle, Clock } from "lucide-react";
 import { useDashboard } from "./hooks/useDashboard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { GoalsProgressCard } from "./components/GoalsProgressCard";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const { stats, loading } = useDashboard();
+  const { profile } = useAuth();
+  
+  const isEmployee = profile?.role === 'employee';
   
   if (loading) {
     return (
@@ -73,6 +78,13 @@ const Dashboard = () => {
           </Card>
         ))}
       </div>
+
+      {/* Goals & Progress Card for Employees */}
+      {isEmployee && (
+        <div className="mb-6">
+          <GoalsProgressCard />
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
