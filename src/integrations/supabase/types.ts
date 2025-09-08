@@ -788,9 +788,17 @@ export type Database = {
         Args: { current_rating_param: string; target_rating_param: string }
         Returns: number
       }
+      cleanup_old_notifications: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      send_goal_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       test_employee_rating_insert: {
         Args: {

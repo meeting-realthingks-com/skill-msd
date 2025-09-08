@@ -91,9 +91,9 @@ export const GoalsProgressCard = () => {
         gamificationData = newGamificationData;
       }
       
-      setUserSkills(userSkillsData || []);
+      setUserSkills((userSkillsData as any) || []);
       setAvailableSkills(skillsData || []);
-      setGoals(goalsData || []);
+      setGoals((goalsData as any) || []);
       setAchievements(achievementsData || []);
       setGamification(gamificationData);
       

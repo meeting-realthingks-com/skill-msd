@@ -47,7 +47,7 @@ export const useGoalsProgress = () => {
         gamificationData = newGamificationData;
       }
       
-      setGoals(goalsData || []);
+      setGoals((goalsData as any) || []);
       setGamification(gamificationData);
       
     } catch (error) {
