@@ -1,14 +1,19 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Edit, Trash2, TrendingUp, Users, Target, X, Settings } from "lucide-react";
 import { AddCategoryModal } from "./admin/AddCategoryModal";
+import { ApprovedRatingsModal } from "./ApprovedRatingsModal";
+import { PendingRatingsModal } from "./PendingRatingsModal";
+import { RejectedRatingsModal } from "./RejectedRatingsModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SkillsService } from "../services/skills.service";
-import type { SkillCategory } from "@/types/database";
+import { calculateCategoryProgress } from "../utils/skillHelpers";
+import type { SkillCategory, EmployeeRating, Skill } from "@/types/database";
 
 interface CategoryCardProps {
   category: SkillCategory;
@@ -17,6 +22,11 @@ interface CategoryCardProps {
   onClick: () => void;
   onRefresh: () => void;
   index: number;
+  userSkills?: EmployeeRating[];
+  skills?: Skill[];
+  subskills?: any[];
+  showHideButton?: boolean;
+  onHide?: (categoryId: string, categoryName: string) => void;
 }
 
 export const CategoryCard = ({
@@ -25,10 +35,34 @@ export const CategoryCard = ({
   isManagerOrAbove,
   onClick,
   onRefresh,
-  index
+  index,
+  userSkills = [],
+  skills = [],
+  subskills = [],
+  showHideButton = false,
+  onHide
 }: CategoryCardProps) => {
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showApprovedModal, setShowApprovedModal] = useState(false);
+  const [showPendingModal, setShowPendingModal] = useState(false);
+  const [showRejectedModal, setShowRejectedModal] = useState(false);
+  const [selectedRatingFilter, setSelectedRatingFilter] = useState<'high' | 'medium' | 'low' | undefined>();
   const { toast } = useToast();
+
+  // Calculate user-specific statistics using new progress rules
+  const progressData = React.useMemo(() => {
+    return calculateCategoryProgress(category.id, skills, subskills, userSkills);
+  }, [category.id, skills, subskills, userSkills]);
+
+  const { 
+    totalItems, 
+    ratedItems, 
+    progressPercentage, 
+    ratingCounts, 
+    approvedCount, 
+    pendingCount,
+    rejectedCount 
+  } = progressData;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -73,6 +107,38 @@ export const CategoryCard = ({
     }
   };
 
+  const handleRatingClick = (rating: 'high' | 'medium' | 'low', e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedRatingFilter(rating);
+    setShowApprovedModal(true);
+  };
+
+  const handleApprovedClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedRatingFilter(undefined);
+    setShowApprovedModal(true);
+  };
+
+  const handleRejectedClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowRejectedModal(true);
+  };
+
+  const handlePendingClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowPendingModal(true);
+  };
+
+  const handleUpdateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClick();
+  };
+
   return (
     <>
       <motion.div
@@ -88,90 +154,190 @@ export const CategoryCard = ({
           y: -8,
           transition: { duration: 0.2 }
         }}
-        whileTap={{ scale: 0.98 }}
         className="group"
       >
         <Card 
-          className="relative h-48 w-full max-w-[400px] mx-auto cursor-pointer border-0 bg-gradient-to-br from-card via-card to-card/90 hover:shadow-2xl transition-all duration-300 overflow-hidden"
-          role="button"
-          tabIndex={0}
-          aria-label={`Open ${category.name} category`}
-          onClick={onClick}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onClick();
-            }
-          }}
+          className="relative h-full w-full border border-border/20 bg-gradient-to-br from-card to-muted/20 hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl"
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
-          {/* Admin Actions */}
-          {isManagerOrAbove && (
-            <div 
-              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-10"
-              onClick={(e) => e.stopPropagation()}
-            >
+          {/* Action Buttons */}
+          <div 
+            className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Hide Category Button for Employee/Tech Lead */}
+            {showHideButton && onHide && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleEdit(e);
-                }}
-                className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-primary/10 border border-border/50"
-                aria-label={`Edit ${category.name}`}
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDelete(e);
+                  onHide(category.id, category.name);
                 }}
                 className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-destructive/10 text-destructive border border-border/50"
-                aria-label={`Delete ${category.name}`}
+                aria-label={`Hide ${category.name}`}
               >
-                <Trash2 className="h-3 w-3" />
+                <X className="h-3 w-3" />
               </Button>
-            </div>
-          )}
-
-          <CardContent className="relative h-full p-6 flex flex-col items-center justify-center text-center z-10">
-            {/* Category Name */}
-            <motion.h3 
-              className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-200 line-clamp-2"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
-            >
-              {category.name}
-            </motion.h3>
-
-            {/* Description */}
-            {category.description && (
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
-                {category.description}
-              </p>
             )}
+            
+            {/* Admin Actions */}
+            {isManagerOrAbove && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleEdit(e);
+                  }}
+                  className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-primary/10 border border-border/50"
+                  aria-label={`Edit ${category.name}`}
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDelete(e);
+                  }}
+                  className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-destructive/10 text-destructive border border-border/50"
+                  aria-label={`Delete ${category.name}`}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </>
+            )}
+          </div>
 
-            {/* Skill Count Badge */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Badge 
-                variant="secondary" 
-                className="text-xs font-medium bg-primary/10 text-primary border-primary/20 px-3 py-1"
+          <CardHeader className="pb-2 px-4 pt-4">
+            <div className="space-y-1">
+              <motion.h3 
+                className="text-2xl font-bold text-foreground line-clamp-2 leading-tight"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
               >
-                {skillCount} {skillCount === 1 ? 'skill' : 'skills'}
-              </Badge>
-            </motion.div>
+                {category.name}
+              </motion.h3>
+              
+              {category.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                  {category.description}
+                </p>
+              )}
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-3 pt-0 px-4 pb-2 relative z-10 flex flex-col h-full">
+            {/* Statistics Grid */}
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={(e) => {
+                  console.log('High button clicked');
+                  handleRatingClick('high', e);
+                }}
+                className="text-center p-4 bg-muted/30 rounded-xl border border-border/30 hover:bg-muted/50 transition-colors cursor-pointer relative z-20"
+                type="button"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="text-lg font-bold text-foreground">{ratingCounts.high}</div>
+                <div className="text-sm text-muted-foreground font-medium">High</div>
+              </button>
+              
+              <button
+                onClick={(e) => {
+                  console.log('Medium button clicked');
+                  handleRatingClick('medium', e);
+                }}
+                className="text-center p-4 bg-muted/30 rounded-xl border border-border/30 hover:bg-muted/50 transition-colors cursor-pointer relative z-20"
+                type="button"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="text-lg font-bold text-foreground">{ratingCounts.medium}</div>
+                <div className="text-sm text-muted-foreground font-medium">Medium</div>
+              </button>
+              
+              <button
+                onClick={(e) => {
+                  console.log('Low button clicked');
+                  handleRatingClick('low', e);
+                }}
+                className="text-center p-4 bg-muted/30 rounded-xl border border-border/30 hover:bg-muted/50 transition-colors cursor-pointer relative z-20"
+                type="button"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="text-lg font-bold text-foreground">{ratingCounts.low}</div>
+                <div className="text-sm text-muted-foreground font-medium">Low</div>
+              </button>
+            </div>
+
+            {/* Footer with Status Pills and Update Button */}
+            <div className="mt-auto pt-1">
+              <div className="flex items-end justify-between">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    onClick={(e) => {
+                      console.log('Approved badge clicked');
+                      handleApprovedClick(e);
+                    }}
+                    className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-semibold transition-colors cursor-pointer hover:bg-muted/80 border-border bg-muted text-foreground"
+                    type="button"
+                  >
+                    {approvedCount} Approved
+                  </button>
+                  {pendingCount > 0 && (
+                    <button
+                      onClick={(e) => {
+                        console.log('Pending badge clicked');
+                        handlePendingClick(e);
+                      }}
+                      className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-semibold transition-colors cursor-pointer hover:bg-muted/60 bg-muted/40 text-muted-foreground border-border"
+                      type="button"
+                    >
+                      {pendingCount} Pending
+                    </button>
+                  )}
+                  {rejectedCount > 0 && (
+                    <button
+                      onClick={(e) => {
+                        console.log('Rejected badge clicked');
+                        handleRejectedClick(e);
+                      }}
+                      className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-semibold transition-colors cursor-pointer hover:bg-muted/60 bg-muted/40 text-muted-foreground border-border"
+                      type="button"
+                    >
+                      {rejectedCount} Rejected
+                    </button>
+                  )}
+                </div>
+                <Button
+                  variant="light"
+                  size="sm"
+                  onClick={(e) => {
+                    console.log('Update button clicked');
+                    handleUpdateClick(e);
+                  }}
+                  className="h-10 px-6 text-base relative z-30 shrink-0"
+                  type="button"
+                >
+                  <Settings className="h-5 w-5 mr-2" />
+                  Update
+                </Button>
+              </div>
+            </div>
 
             {/* Hover indicator */}
             <motion.div 
@@ -181,8 +347,6 @@ export const CategoryCard = ({
             />
           </CardContent>
 
-          {/* Click ripple effect */}
-          <div className="absolute inset-0 bg-primary/5 opacity-0 group-active:opacity-100 transition-opacity duration-150" />
         </Card>
       </motion.div>
 
@@ -194,6 +358,40 @@ export const CategoryCard = ({
           setShowEditModal(false);
           onRefresh();
         }}
+      />
+
+      <ApprovedRatingsModal
+        open={showApprovedModal}
+        onOpenChange={setShowApprovedModal}
+        categoryName={category.name}
+        ratings={userSkills}
+        skills={skills.filter(skill => skill.category_id === category.id)}
+        subskills={subskills.filter(subskill => 
+          skills.some(skill => skill.id === subskill.skill_id && skill.category_id === category.id)
+        )}
+        filterRating={selectedRatingFilter}
+      />
+
+      <PendingRatingsModal
+        open={showPendingModal}
+        onOpenChange={setShowPendingModal}
+        categoryName={category.name}
+        ratings={userSkills}
+        skills={skills.filter(skill => skill.category_id === category.id)}
+        subskills={subskills.filter(subskill => 
+          skills.some(skill => skill.id === subskill.skill_id && skill.category_id === category.id)
+        )}
+      />
+
+      <RejectedRatingsModal
+        open={showRejectedModal}
+        onOpenChange={setShowRejectedModal}
+        categoryName={category.name}
+        ratings={userSkills}
+        skills={skills.filter(skill => skill.category_id === category.id)}
+        subskills={subskills.filter(subskill => 
+          skills.some(skill => skill.id === subskill.skill_id && skill.category_id === category.id)
+        )}
       />
     </>
   );

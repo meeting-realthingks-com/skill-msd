@@ -9,9 +9,9 @@ interface RatingPillProps {
 
 export const RatingPill = ({ rating, onRatingChange, disabled = false, className }: RatingPillProps) => {
   const ratingOptions = [
-    { value: 'high' as const, label: 'High', color: 'bg-emerald-500 text-white' },
-    { value: 'medium' as const, label: 'Medium', color: 'bg-amber-500 text-white' },
-    { value: 'low' as const, label: 'Low', color: 'bg-slate-500 text-white' }
+    { value: 'high' as const, label: 'High', color: 'bg-success text-success-foreground' },
+    { value: 'medium' as const, label: 'Medium', color: 'bg-warning text-warning-foreground' },
+    { value: 'low' as const, label: 'Low', color: 'bg-secondary text-secondary-foreground' }
   ];
 
   return (

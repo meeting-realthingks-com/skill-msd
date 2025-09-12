@@ -25,22 +25,26 @@ interface CategoryModalProps {
   onClose: () => void;
   onSkillRate: (skillId: string, rating: 'high' | 'medium' | 'low') => void;
   onSubskillRate: (subskillId: string, rating: 'high' | 'medium' | 'low') => void;
-  onSaveRatings: () => void;
+  onSaveRatings: (ratingsWithComments: Array<{id: string, type: 'skill' | 'subskill', rating: 'high' | 'medium' | 'low', comment: string}>) => void;
   onRefresh: () => void;
+  targetSkillId?: string; // For auto-expansion when coming from search
+  targetSubskillId?: string; // For auto-highlighting when coming from search
 }
-export const CategoryModal = ({
-  category,
-  skills,
-  subskills,
-  userSkills,
-  pendingRatings,
-  isManagerOrAbove,
-  profile,
-  onClose,
-  onSkillRate,
-  onSubskillRate,
-  onSaveRatings,
-  onRefresh
+export const CategoryModal = ({ 
+  category, 
+  skills, 
+  subskills, 
+  userSkills, 
+  pendingRatings, 
+  isManagerOrAbove, 
+  profile, 
+  onClose, 
+  onSkillRate, 
+  onSubskillRate, 
+  onSaveRatings, 
+  onRefresh,
+  targetSkillId,
+  targetSubskillId
 }: CategoryModalProps) => {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [showAddSkill, setShowAddSkill] = useState(false);
@@ -51,6 +55,15 @@ export const CategoryModal = ({
   const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
   const [pendingSubmit, setPendingSubmit] = useState<string[]>([]);
   const { toast } = useToast();
+  const [commentsMap, setCommentsMap] = useState<Record<string, string>>({});
+  const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
+
+  // Auto-expand skills when coming from search results
+  useEffect(() => {
+    if (targetSkillId) {
+      setExpandedSkills(prev => new Set([...prev, targetSkillId]));
+    }
+  }, [targetSkillId]);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -175,7 +188,7 @@ export const CategoryModal = ({
      }} transition={{
       duration: 0.2,
       ease: "easeOut"
-    }} className="relative z-10 w-full max-w-4xl max-h-[90vh] mx-auto">
+    }} className="relative z-10 w-full max-w-5xl max-h-[95vh] mx-auto">
         <Card className="shadow-2xl border-0 bg-card/95 backdrop-blur-sm overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b bg-card/50">
@@ -193,13 +206,13 @@ export const CategoryModal = ({
                       <Badge variant="outline" className="text-xs">
                         {skills.length} {skills.length === 1 ? 'skill' : 'skills'}
                       </Badge>
-                      {draftCount > 0 && <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800">
+                      {draftCount > 0 && <Badge variant="secondary" className="text-xs bg-warning/20 text-warning-foreground border-warning/30">
                           {draftCount} draft
                         </Badge>}
-                      {submittedCount > 0 && <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                      {submittedCount > 0 && <Badge variant="secondary" className="text-xs bg-primary/20 text-primary-foreground border-primary/30">
                           {submittedCount} pending
                         </Badge>}
-                      {approvedCount > 0 && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                      {approvedCount > 0 && <Badge variant="secondary" className="text-xs bg-success/20 text-success-foreground border-success/30">
                           {approvedCount} approved
                         </Badge>}
                     </div>
@@ -218,17 +231,12 @@ export const CategoryModal = ({
                   Add Skill
                 </Button>}
               
-              {!selectedSkill && !isManagerOrAbove && draftCount > 0 && <Button onClick={handleSubmitRatings} disabled={pendingSubmit.length > 0} className="bg-primary hover:bg-primary/90">
+              {!selectedSkill && !isManagerOrAbove && draftCount > 0 && <Button onClick={handleSubmitRatings} disabled={pendingSubmit.length > 0}>
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Submit {draftCount} Rating{draftCount !== 1 ? 's' : ''}
                 </Button>}
               
-              {/* Save Ratings button for pending ratings */}
-              {!selectedSkill && !isManagerOrAbove && pendingRatings.size > 0 && (
-                <Button onClick={onSaveRatings} className="bg-green-600 hover:bg-green-700">
-                  Save Ratings ({pendingRatings.size})
-                </Button>
-              )}
+              
               
               <Button variant="ghost" size="sm" onClick={onClose} className="p-2 hover:bg-muted" aria-label="Close modal">
                 <X className="h-4 w-4" />
@@ -269,7 +277,7 @@ export const CategoryModal = ({
                     {isManagerOrAbove}
 
                     {/* Skills List */}
-                    <ScrollArea className="h-[600px]">
+                    <ScrollArea className="h-[720px]">
                       <div className="p-6 space-y-3">
                         {skills.length === 0 ? <div className="text-center py-12">
                             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -296,8 +304,16 @@ export const CategoryModal = ({
                       delay: index * 0.05,
                       ease: "easeOut"
                     }}>
-                              <SkillRow skill={skill} subskills={subskills.filter(s => s.skill_id === skill.id)} userSkills={userSkills} pendingRatings={pendingRatings} isManagerOrAbove={isManagerOrAbove} onClick={() => handleSkillClick(skill)} onSkillRate={onSkillRate} onSubskillRate={onSubskillRate} onRefresh={onRefresh} onEditSkill={() => handleEditSkill(skill)} onDeleteSkill={() => handleDeleteSkill(skill)} />
-                            </motion.div>)}
+                              <SkillRow skill={skill} subskills={subskills.filter(s => s.skill_id === skill.id)} userSkills={userSkills} pendingRatings={pendingRatings} isManagerOrAbove={isManagerOrAbove} onClick={() => handleSkillClick(skill)} onSkillRate={onSkillRate} onSubskillRate={onSubskillRate} onSaveRatings={onSaveRatings} onRefresh={onRefresh} onEditSkill={() => handleEditSkill(skill)} onDeleteSkill={() => handleDeleteSkill(skill)} targetSubskillId={targetSubskillId} expanded={expandedSkills.has(skill.id)} onToggleExpanded={() => {
+                                const newExpanded = new Set(expandedSkills);
+                                if (newExpanded.has(skill.id)) {
+                                  newExpanded.delete(skill.id);
+                                } else {
+                                  newExpanded.add(skill.id);
+                                }
+                                setExpandedSkills(newExpanded);
+                              }} />
+                             </motion.div>)}
                       </div>
                     </ScrollArea>
                   </CardContent>
@@ -327,5 +343,6 @@ export const CategoryModal = ({
       setShowAddSubskill(false);
       onRefresh();
     }} />
+
     </motion.div>;
 };

@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
-
+import { usePendingApprovals } from '@/hooks/usePendingApprovals';
 import { useToast } from '@/hooks/use-toast';
 
 const items = [
@@ -23,7 +23,7 @@ const items = [
     title: 'Dashboard', 
     url: '/', 
     icon: LayoutDashboard,
-    roles: ['employee', 'tech_lead', 'manager', 'admin'] 
+    roles: ['manager', 'admin'] 
   },
   { 
     title: 'Skills', 
@@ -35,20 +35,7 @@ const items = [
     title: 'Approvals', 
     url: '/approvals', 
     icon: CheckCircle,
-    roles: ['tech_lead', 'manager', 'admin'],
-    badge: 3 // This would be dynamic in real app
-  },
-  { 
-    title: 'Projects', 
-    url: '/projects', 
-    icon: FolderKanban,
-    roles: ['employee', 'tech_lead', 'manager', 'admin'] 
-  },
-  { 
-    title: 'Reports', 
-    url: '/reports', 
-    icon: BarChart3,
-    roles: ['tech_lead', 'manager', 'admin'] 
+    roles: ['tech_lead', 'manager', 'admin']
   },
   { 
     title: 'Admin', 
@@ -61,11 +48,12 @@ const items = [
 const bottomItems: any[] = [];
 
 export function AppSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const { toast } = useToast();
+  const { pendingCount } = usePendingApprovals();
   const currentPath = location.pathname;
 
   const toggleSidebar = () => {
@@ -115,7 +103,7 @@ return (
               collapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'
             }`}
           >
-            RealThings
+            RealThingks
           </div>
         </div>
       </div>
@@ -146,9 +134,9 @@ return (
                   }`}
                 >
                   <span className="text-sm font-medium">{item.title}</span>
-                  {item.badge && (
+                  {item.title === 'Approvals' && pendingCount > 0 && (
                     <Badge variant="secondary" className="ml-2 text-xs bg-sidebar-accent text-sidebar-foreground/70 flex-shrink-0">
-                      {item.badge}
+                      {pendingCount}
                     </Badge>
                   )}
                 </div>
@@ -255,7 +243,7 @@ return (
                 >
                   <div className="text-left">
                     <div className="text-sm font-medium truncate max-w-32">{displayName}</div>
-                    <div className="text-xs text-sidebar-foreground/50">Click to logout</div>
+                    <div className="text-xs text-sidebar-foreground/50"></div>
                   </div>
                 </div>
               </button>
@@ -271,7 +259,7 @@ return (
                     <TooltipContent side="right" className="ml-2">
                       <div className="text-center">
                         <p className="font-medium">{displayName}</p>
-                        <p className="text-xs text-muted-foreground">Click to logout</p>
+                        <p className="text-xs text-muted-foreground"></p>
                       </div>
                     </TooltipContent>
                   </Tooltip>

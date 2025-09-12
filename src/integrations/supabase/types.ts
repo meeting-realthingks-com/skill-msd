@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      approval_audit_logs: {
+        Row: {
+          action: string
+          approver_comment: string | null
+          approver_id: string
+          created_at: string
+          employee_comment: string | null
+          id: string
+          metadata: Json | null
+          new_status: string | null
+          previous_status: string | null
+          rating_id: string
+        }
+        Insert: {
+          action: string
+          approver_comment?: string | null
+          approver_id: string
+          created_at?: string
+          employee_comment?: string | null
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          previous_status?: string | null
+          rating_id: string
+        }
+        Update: {
+          action?: string
+          approver_comment?: string | null
+          approver_id?: string
+          created_at?: string
+          employee_comment?: string | null
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          previous_status?: string | null
+          rating_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_audit_logs_rating_id_fkey"
+            columns: ["rating_id"]
+            isOneToOne: false
+            referencedRelation: "employee_ratings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_history: {
         Row: {
           action: string
@@ -51,6 +98,50 @@ export type Database = {
             columns: ["rating_history_id"]
             isOneToOne: false
             referencedRelation: "skill_rating_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_logs: {
+        Row: {
+          action: string
+          approver_comment: string | null
+          approver_id: string
+          created_at: string | null
+          employee_comment: string | null
+          id: string
+          new_rating: string | null
+          previous_rating: string | null
+          rating_id: string
+        }
+        Insert: {
+          action: string
+          approver_comment?: string | null
+          approver_id: string
+          created_at?: string | null
+          employee_comment?: string | null
+          id?: string
+          new_rating?: string | null
+          previous_rating?: string | null
+          rating_id: string
+        }
+        Update: {
+          action?: string
+          approver_comment?: string | null
+          approver_id?: string
+          created_at?: string | null
+          employee_comment?: string | null
+          id?: string
+          new_rating?: string | null
+          previous_rating?: string | null
+          rating_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_logs_rating_id_fkey"
+            columns: ["rating_id"]
+            isOneToOne: false
+            referencedRelation: "employee_ratings"
             referencedColumns: ["id"]
           },
         ]
@@ -184,6 +275,33 @@ export type Database = {
           log_level?: string
           operation_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      leaderboard_history: {
+        Row: {
+          created_at: string
+          id: string
+          rank_position: number
+          total_xp: number
+          user_id: string
+          week_start_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rank_position: number
+          total_xp: number
+          user_id: string
+          week_start_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rank_position?: number
+          total_xp?: number
+          user_id?: string
+          week_start_date?: string
         }
         Relationships: []
       }
@@ -674,6 +792,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_category_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          visible_category_ids: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          visible_category_ids?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          visible_category_ids?: string[]
+        }
+        Relationships: []
+      }
       user_gamification: {
         Row: {
           best_streak: number | null
@@ -807,6 +949,10 @@ export type Database = {
           p_subskill_id: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      update_leaderboard_history: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
     }
