@@ -235,23 +235,21 @@ export const CategoryCard = ({
             </div>
           </CardHeader>
 
-          <CardContent className="pt-0 px-4 pb-4 relative z-10 flex flex-col h-full">
-            {/* Statistics Row */}
-            <div className="flex justify-center gap-8 py-6">
+          <CardContent className="space-y-3 pt-0 px-4 pb-2 relative z-10 flex flex-col h-full">
+            {/* Statistics Grid */}
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={(e) => {
                   console.log('High button clicked');
                   handleRatingClick('high', e);
                 }}
-                className="text-center cursor-pointer relative z-20 hover:opacity-80 transition-opacity"
+                className="text-center p-4 bg-muted/30 rounded-xl border border-border/30 hover:bg-muted/50 transition-colors cursor-pointer relative z-20"
                 type="button"
               >
                 <div className="flex items-center justify-center mb-2">
-                  <div className="w-8 h-8 rounded-full border-2 border-primary flex items-center justify-center">
-                    <Target className="h-4 w-4 text-primary" />
-                  </div>
+                  <Target className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold text-foreground">{ratingCounts.high}</div>
+                <div className="text-lg font-bold text-foreground">{ratingCounts.high}</div>
                 <div className="text-sm text-muted-foreground font-medium">High</div>
               </button>
               
@@ -260,15 +258,13 @@ export const CategoryCard = ({
                   console.log('Medium button clicked');
                   handleRatingClick('medium', e);
                 }}
-                className="text-center cursor-pointer relative z-20 hover:opacity-80 transition-opacity"
+                className="text-center p-4 bg-muted/30 rounded-xl border border-border/30 hover:bg-muted/50 transition-colors cursor-pointer relative z-20"
                 type="button"
               >
                 <div className="flex items-center justify-center mb-2">
-                  <div className="w-8 h-8 rounded-full border-2 border-primary flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                  </div>
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold text-foreground">{ratingCounts.medium}</div>
+                <div className="text-lg font-bold text-foreground">{ratingCounts.medium}</div>
                 <div className="text-sm text-muted-foreground font-medium">Medium</div>
               </button>
               
@@ -277,29 +273,27 @@ export const CategoryCard = ({
                   console.log('Low button clicked');
                   handleRatingClick('low', e);
                 }}
-                className="text-center cursor-pointer relative z-20 hover:opacity-80 transition-opacity"
+                className="text-center p-4 bg-muted/30 rounded-xl border border-border/30 hover:bg-muted/50 transition-colors cursor-pointer relative z-20"
                 type="button"
               >
                 <div className="flex items-center justify-center mb-2">
-                  <div className="w-8 h-8 rounded-full border-2 border-primary flex items-center justify-center">
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
+                  <Users className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold text-foreground">{ratingCounts.low}</div>
+                <div className="text-lg font-bold text-foreground">{ratingCounts.low}</div>
                 <div className="text-sm text-muted-foreground font-medium">Low</div>
               </button>
             </div>
 
             {/* Footer with Status Pills and Update Button */}
-            <div className="mt-auto">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+            <div className="mt-auto pt-1">
+              <div className="flex items-end justify-between">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     onClick={(e) => {
                       console.log('Approved badge clicked');
                       handleApprovedClick(e);
                     }}
-                    className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-semibold transition-colors cursor-pointer hover:bg-muted/80 border-border bg-muted text-foreground"
                     type="button"
                   >
                     {approvedCount} Approved
@@ -310,7 +304,7 @@ export const CategoryCard = ({
                         console.log('Pending badge clicked');
                         handlePendingClick(e);
                       }}
-                      className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-semibold transition-colors cursor-pointer hover:bg-muted/60 bg-muted/40 text-muted-foreground border-border"
                       type="button"
                     >
                       {pendingCount} Pending
@@ -322,7 +316,7 @@ export const CategoryCard = ({
                         console.log('Rejected badge clicked');
                         handleRejectedClick(e);
                       }}
-                      className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-semibold transition-colors cursor-pointer hover:bg-muted/60 bg-muted/40 text-muted-foreground border-border"
                       type="button"
                     >
                       {rejectedCount} Rejected
@@ -330,20 +324,27 @@ export const CategoryCard = ({
                   )}
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="light"
                   size="sm"
                   onClick={(e) => {
                     console.log('Update button clicked');
                     handleUpdateClick(e);
                   }}
-                  className="h-8 px-3 text-sm relative z-30 shrink-0"
+                  className="h-10 px-6 text-base relative z-30 shrink-0"
                   type="button"
                 >
-                  <Settings className="h-4 w-4 mr-1" />
+                  <Settings className="h-5 w-5 mr-2" />
                   Update
                 </Button>
               </div>
             </div>
+
+            {/* Hover indicator */}
+            <motion.div 
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              initial={false}
+              animate={{ width: "2rem" }}
+            />
           </CardContent>
 
         </Card>
