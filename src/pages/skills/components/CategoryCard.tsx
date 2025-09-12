@@ -157,7 +157,7 @@ export const CategoryCard = ({
         className="group"
       >
         <Card 
-          className="relative h-full w-full border border-border/20 bg-gradient-to-br from-card to-muted/20 hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl"
+          className="relative h-full w-full border border-border/20 bg-card hover:shadow-lg transition-all duration-300 overflow-hidden rounded-lg"
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -217,10 +217,10 @@ export const CategoryCard = ({
             )}
           </div>
 
-          <CardHeader className="pb-2 px-4 pt-4">
+          <CardHeader className="pb-6 px-6 pt-6">
             <div className="space-y-1">
               <motion.h3 
-                className="text-2xl font-bold text-foreground line-clamp-2 leading-tight"
+                className="text-lg font-semibold text-foreground"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
@@ -228,28 +228,28 @@ export const CategoryCard = ({
               </motion.h3>
               
               {category.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                <p className="text-sm text-muted-foreground line-clamp-2">
                   {category.description}
                 </p>
               )}
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4 pt-0 px-4 pb-4 relative z-10 flex flex-col h-full">
+          <CardContent className="px-6 pb-6 relative z-10 flex flex-col h-full">
             {/* Rating Icons in Horizontal Row */}
-            <div className="flex justify-center gap-8 py-4">
+            <div className="flex justify-center gap-12 py-8">
               <button
                 onClick={(e) => {
                   console.log('High button clicked');
                   handleRatingClick('high', e);
                 }}
-                className="flex flex-col items-center gap-2 cursor-pointer relative z-20 hover:scale-105 transition-transform"
+                className="flex flex-col items-center gap-3 cursor-pointer relative z-20 hover:scale-105 transition-transform"
                 type="button"
               >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Target className="h-6 w-6 text-primary" />
+                <div className="w-12 h-12 rounded-full border-2 border-primary bg-background flex items-center justify-center">
+                  <Target className="h-5 w-5 text-primary" />
                 </div>
-                <div className="text-xl font-bold text-foreground">{ratingCounts.high}</div>
+                <div className="text-2xl font-bold text-foreground">{ratingCounts.high}</div>
                 <div className="text-sm text-muted-foreground font-medium">High</div>
               </button>
               
@@ -258,13 +258,13 @@ export const CategoryCard = ({
                   console.log('Medium button clicked');
                   handleRatingClick('medium', e);
                 }}
-                className="flex flex-col items-center gap-2 cursor-pointer relative z-20 hover:scale-105 transition-transform"
+                className="flex flex-col items-center gap-3 cursor-pointer relative z-20 hover:scale-105 transition-transform"
                 type="button"
               >
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-secondary" />
+                <div className="w-12 h-12 rounded-full border-2 border-muted-foreground bg-background flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="text-xl font-bold text-foreground">{ratingCounts.medium}</div>
+                <div className="text-2xl font-bold text-foreground">{ratingCounts.medium}</div>
                 <div className="text-sm text-muted-foreground font-medium">Medium</div>
               </button>
               
@@ -273,13 +273,13 @@ export const CategoryCard = ({
                   console.log('Low button clicked');
                   handleRatingClick('low', e);
                 }}
-                className="flex flex-col items-center gap-2 cursor-pointer relative z-20 hover:scale-105 transition-transform"
+                className="flex flex-col items-center gap-3 cursor-pointer relative z-20 hover:scale-105 transition-transform"
                 type="button"
               >
-                <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-muted-foreground" />
+                <div className="w-12 h-12 rounded-full border-2 border-muted-foreground bg-background flex items-center justify-center">
+                  <Users className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="text-xl font-bold text-foreground">{ratingCounts.low}</div>
+                <div className="text-2xl font-bold text-foreground">{ratingCounts.low}</div>
                 <div className="text-sm text-muted-foreground font-medium">Low</div>
               </button>
             </div>
